@@ -1,11 +1,19 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+from api_yamdb.settings import ROLE_CHOICES
 
 
 class User(AbstractUser):
-    confirmation_code = models.TextField(
-        'Код подтверждения',
+    role = models.CharField(
+        max_length=9,
+        choices=ROLE_CHOICES,
+        default="user"
     )
-    role = models.TextField()
-    bio = models.TextField(blank=True)
-    
+    bio = models.TextField(
+        verbose_name='bio',
+        help_text='Напишите о себе',
+        blank=True
+    )
+
+    class Meta:
+        db_table = 'auth_user'

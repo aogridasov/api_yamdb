@@ -127,3 +127,9 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
+
+ROLE_CHOICES = (
+    ('admin', 'Администратор'),
+    ('moderator', 'Модератор'),
+    ('user', 'Пользователь'),
+)

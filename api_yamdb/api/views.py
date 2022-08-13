@@ -8,8 +8,9 @@ from rest_framework.permissions import (
 )
 
 import reviews.models as m
-import .serializers as s
-import .permissions as p 
+from . import serializers as s
+from . import permissions as p
+
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
