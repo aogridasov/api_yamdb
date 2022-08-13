@@ -5,7 +5,7 @@ User = get_user_model()
 
 
 class Title(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=200)
 
 
 class Review(models.Model):
