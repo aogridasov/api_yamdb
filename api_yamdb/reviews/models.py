@@ -1,11 +1,35 @@
-from django.contrib.auth import get_user_model
 from django.db import models
 
-User = get_user_model()
+from users.models import User
 
 
-class Title(models.Model):
-    name = models.CharField(max_length=200)
+class Category(models.Model):
+    name = models.CharField('Название категории', max_length=200)
+    slug = models.SlugField('Слаг', unique=True)
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Genres(models.Model):
+    name = models.CharField('Название жанра', max_length=200)
+    slug = models.SlugField('Слаг', unique=True)
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Titles(models.Model):
+    name = models.CharField('Название произведения', max_length=200)
+    year = models.DateTimeField('Год выхода', auto_now_add=True)
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+        related_name='category'
+    )
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Review(models.Model):
@@ -13,7 +37,7 @@ class Review(models.Model):
     #score = models.IntegerChoices('Score', '1 2 3 4 5 6 7 8 9 10')
     score = models.IntegerField()
     title = models.ForeignKey(
-        Title,
+        Titles,
         on_delete=models.CASCADE,
         related_name='reviews'
     )
@@ -43,3 +67,4 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text
+
