@@ -3,8 +3,11 @@ import uuid
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 
-from rest_framework import filters, permissions, viewsets
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import filters, permissions, viewsets, status
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
@@ -13,6 +16,7 @@ from rest_framework.permissions import (
 import reviews.models as m
 from . import serializers as s
 from . import permissions as p
+from users.models import User
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -97,5 +101,19 @@ class SignupViewSet(viewsets.ModelViewSet):
         )
 
 
-class TokenViewSet(viewsets.ModelViewSet):
-    pass
+class TokenView(APIView):
+    permission_classes = (p.IsPost,)
+
+    def post(self, request):
+        serializer = s.TokenSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.initial_data.get('username')
+            user = get_object_or_404(User, username=username)
+            confirmation_code = serializer.initial_data.get('confirmation_code')
+
+            if user.confirmation_code != confirmation_code:
+                return Response({"token": "incorrect"}, status=status.HTTP_400_BAD_REQUEST)
+
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+            return Response({"token": f"{access_token}"})

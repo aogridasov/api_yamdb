@@ -54,3 +54,10 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email',)
+
+
+class TokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code',)
+        read_only_fields = ('username', 'confirmation_code',)
