@@ -14,6 +14,10 @@ class User(AbstractUser):
         help_text='Напишите о себе',
         blank=True
     )
+    confirmation_code = models.CharField(
+        max_length=32,
+        blank=True
+    )
 
     class Meta:
         db_table = 'auth_user'

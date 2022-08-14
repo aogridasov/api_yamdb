@@ -10,3 +10,10 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
             request.method in permissions.SAFE_METHODS
             or obj.author == request.user
         )
+
+
+class IsPost(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            return True

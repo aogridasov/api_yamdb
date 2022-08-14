@@ -1,16 +1,18 @@
+import uuid
+
 from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
 
 from rest_framework import filters, permissions, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (
     IsAuthenticated,
-    IsAuthenticatedOrReadOnly
+    IsAuthenticatedOrReadOnly,
 )
 
 import reviews.models as m
 from . import serializers as s
 from . import permissions as p
-
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -75,3 +77,25 @@ class CommentViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             review=get_object_or_404(m.Review, pk=review_id)
         )
+
+
+class SignupViewSet(viewsets.ModelViewSet):
+    serializer_class = s.UserSerializer
+    permission_classes = (p.IsPost,)
+
+    def perform_create(self, serializer):
+        email = serializer.validated_data.get('email')
+        confirmation_code = uuid.uuid4().hex
+        serializer.save(confirmation_code=confirmation_code)
+
+        send_mail(
+            'Code for get token',
+            confirmation_code,
+            'bestTeam@ever.com',
+            [email],
+            fail_silently=False,
+        )
+
+
+class TokenViewSet(viewsets.ModelViewSet):
+    pass
