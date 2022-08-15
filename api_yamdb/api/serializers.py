@@ -1,24 +1,56 @@
 from rest_framework import serializers
-
-from reviews.models import Category, Comment, Genres, Review, Titles 
+from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
 
 
 class CategorySerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['name', 'slug']
 
 
-class GenresSerializer(serializers.ModelSerializer):
+class GenreSerializer(serializers.ModelSerializer):
+
     class Meta:
-        model = Genres
-        fields = '__all__'
+        model = Genre
+        fields = ['name', 'slug']
 
 
-class TitlesSerializer(serializers.ModelSerializer):
+class TitleListSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(read_only=True, many=True)
+    category = CategorySerializer(read_only=True)
+
     class Meta:
-        model = Titles
+        fields = ('id', 'name', 'year', 'genre',
+                  'category', 'description')
+        model = Title
+
+
+class TitleCreateSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        many=True,
+        queryset=Genre.objects.all(),
+    )
+
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all(),
+    )
+
+    class Meta:
         fields = '__all__'
+        model = Title
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(read_only=True, many=True)
+    category = CategorySerializer(read_only=True)
+
+    class Meta:
+        model = Title
+        fields = ('id', 'name', 'year', 'category', 'genre', 'description')
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -34,7 +66,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'score', 'title', 'author', 'pub_date',)
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -45,5 +77,44 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id', 'text', 'review', 'author', 'pub_date',)
+        fields = ('text', 'review', 'author', 'pub_date',)
         read_only_fields = ('review',)
+
+
+class UserSerializer(serializers.ModelSerializer):
+    def validate_username(self, value):
+        """
+        Валидация username
+        """
+        if value.lower() == 'me':
+            raise serializers.ValidationError(
+                "Нельзя создавать юзера с ником me"
+            )
+        return value
+
+    class Meta:
+        model = User
+        fields = ('email', 'username',)
+
+
+class TokenSerializer(serializers.Serializer):
+    confirmation_code = serializers.CharField(
+        max_length=32,
+    )
+    username = serializers.CharField(max_length=200)
+
+
+class UserListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('username', 'email',
+                  'first_name', 'last_name', 'bio', 'role',)
+
+
+class UserEditSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ("username", "email", "first_name",
+                  "last_name", "bio", "role")
+        model = User
+        read_only_fields = ('role',)
