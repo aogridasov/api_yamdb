@@ -98,7 +98,6 @@ REST_FRAMEWORK = {
     ],
 }
 
-AUTH_USER_MODEL = 'users.User'
 # Internationalization
 
 LANGUAGE_CODE = 'en-us'
