@@ -14,6 +14,22 @@ class User(AbstractUser):
         help_text='Напишите о себе',
         blank=True
     )
+    confirmation_code = models.CharField(
+        max_length=32,
+        blank=True
+    )
+    email = models.EmailField(
+        verbose_name='Адрес электронной почты',
+        unique=True,
+    )
+
+    @property
+    def is_admin(self):
+        return self.role == 'admin' or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        return self.role == 'moderator' or self.is_superuser
 
     class Meta:
         db_table = 'auth_user'
