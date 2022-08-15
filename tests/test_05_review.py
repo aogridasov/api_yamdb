@@ -5,7 +5,6 @@ from .common import (auth_client, create_reviews, create_titles,
 
 
 class Test05ReviewAPI:
-
     @pytest.mark.django_db(transaction=True)
     def test_01_review_not_auth(self, client, admin_client):
         titles, _, _ = create_titles(admin_client)
