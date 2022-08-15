@@ -1,45 +1,54 @@
-from django.shortcuts import get_object_or_404
-
-from rest_framework import filters, permissions, viewsets
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import (
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly
-)
-
+from . import permissions as p
+from . import serializers as s
 import reviews.models as m
-import .serializers as s
-import .permissions as p 
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, filters
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CreateDestroyListViewSet(
+    CreateModelMixin,
+    DestroyModelMixin,
+    ListModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
+
+
+class CategoryViewSet(CreateDestroyListViewSet):
     queryset = m.Category.objects.all()
     serializer_class = s.CategorySerializer
-    filter_backends = (filters.OrderingFilter,)
     pagination_class = LimitOffsetPagination
-    permission_classes = [
-        IsAuthenticatedOrReadOnly,
-    ]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ('name',)
+    lookup_field = 'slug'
+    permission_classes = (p.IsAdminOrReadOnly,)
 
 
-class GenresViewSet(viewsets.ModelViewSet):
-    queryset = m.Genres.objects.all()
-    serializer_class = s.GenresSerializer
-    filter_backends = (filters.OrderingFilter,)
+class GenresViewSet(CreateDestroyListViewSet):
+    queryset = m.Genre.objects.all()
+    serializer_class = s.GenreSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = [
-        IsAuthenticatedOrReadOnly,
-    ]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ('name',)
+    lookup_field = 'slug'
+    permission_classes = (p.IsAdminOrReadOnly,)
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
-    queryset = m.Titles.objects .all()
-    serializer_class = s.TitlesSerializer
-    filter_backends = (filters.OrderingFilter,)
+    queryset = m.Title.objects.all()
+    permission_classes = (p.IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
-    permission_classes = [
-        IsAuthenticatedOrReadOnly,
-    ]
+    filter_backends = [filters.SearchFilter]
+    filterset_fields = ('genre__slug',)
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return s.TitleCreateSerializer
+        return s.TitleListSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
