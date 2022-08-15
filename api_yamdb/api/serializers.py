@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from users.models import User
 
-from reviews.models import Category, Comment, Genres, Review, Titles 
+from reviews.models import Category, Comment, Genres, Review, Titles
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -51,13 +51,39 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    def validate_username(self, value):
+        """
+        Валидация username
+        """
+        if value.lower() == 'me':
+            raise serializers.ValidationError(
+                "Нельзя создавать юзера с ником me"
+            )
+        return value
+
     class Meta:
         model = User
-        fields = ('username', 'email',)
+        fields = ('email', 'username',)
 
 
-class TokenSerializer(serializers.ModelSerializer):
+class TokenSerializer(serializers.Serializer):
+    confirmation_code = serializers.CharField(
+        max_length=32,
+    )
+    username = serializers.CharField(max_length=200)
+
+
+class UserListSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = User
-        fields = ('username', 'confirmation_code',)
-        read_only_fields = ('username', 'confirmation_code',)
+        fields = ('username', 'email',
+                  'first_name', 'last_name', 'bio', 'role',)
+
+
+class UserEditSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ("username", "email", "first_name",
+                  "last_name", "bio", "role")
+        model = User
+        read_only_fields = ('role',)
