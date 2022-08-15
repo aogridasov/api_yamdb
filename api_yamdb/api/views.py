@@ -1,12 +1,32 @@
-from . import permissions as p
-from . import serializers as s
-import reviews.models as m
+
+from rest_framework.mixins import (
+    CreateModelMixin,
+    DestroyModelMixin,
+    ListModelMixin)
+import uuid
+
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, filters
+from django.core.mail import send_mail
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import (
+    filters,
+    viewsets,
+    status,
+    generics
+)
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin)
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
+
+import reviews.models as m
+from . import serializers as s
+from . import permissions as p
+from users.models import User
 
 
 class CreateDestroyListViewSet(
@@ -83,3 +103,77 @@ class CommentViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             review=get_object_or_404(m.Review, pk=review_id)
         )
+
+
+class SignupViewSet(viewsets.ModelViewSet):
+    serializer_class = s.UserSerializer
+    permission_classes = (p.IsPost,)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def perform_create(self, serializer):
+        email = serializer.validated_data.get('email')
+        confirmation_code = uuid.uuid4().hex
+        serializer.save(confirmation_code=confirmation_code)
+
+        send_mail(
+            'Code for get token',
+            confirmation_code,
+            'bestTeam@ever.com',
+            [email],
+            fail_silently=False,
+        )
+        return Response('serializer.data', status=status.HTTP_200_OK)
+
+
+class TokenView(APIView):
+    permission_classes = (p.IsPost,)
+
+    def post(self, request):
+        serializer = s.TokenSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.initial_data.get('username')
+            user = get_object_or_404(User, username=username)
+            confirmation_code = serializer.initial_data.get(
+                'confirmation_code'
+            )
+
+            if user.confirmation_code != confirmation_code:
+                return Response(
+                    {"token": "incorrect"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+            return Response({"token": f"{access_token}"})
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class UsersViewSet(viewsets.ModelViewSet):
+    lookup_field = "username"
+    queryset = m.User.objects.all()
+    pagination_class = LimitOffsetPagination
+    permission_classes = (IsAuthenticated, p.IsAdmin,)
+    serializer_class = s.UserListSerializer
+    filter_backends = (filters.OrderingFilter,)
+
+
+class MeViewSet(generics.RetrieveUpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = s.UserEditSerializer
+    pagination_class = None
+
+    def get_object(self):
+        username = self.request.user.username
+        return get_object_or_404(User, username=username)
+
+    def perform_update(self, serializer):
+        serializer.save()
