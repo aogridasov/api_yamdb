@@ -74,7 +74,6 @@ class TitlesViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [
         IsAuthenticatedOrReadOnly,
-        p.IsAuthorOrReadOnly,
     ]
 
     queryset = m.Review.objects.all()
@@ -88,7 +87,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [
         IsAuthenticatedOrReadOnly,
-        p.IsAuthorOrReadOnly,
     ]
     serializer_class = s.CommentSerializer
 
