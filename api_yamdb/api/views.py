@@ -1,4 +1,3 @@
-
 from rest_framework.mixins import (
     CreateModelMixin,
     DestroyModelMixin,
@@ -20,7 +19,6 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import (
     IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
 )
 
 import reviews.models as m
@@ -73,22 +71,31 @@ class TitlesViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [
-        IsAuthenticatedOrReadOnly,
-        p.IsAuthorOrReadOnly,
+        p.HasRightsOrReadOnly,
     ]
 
-    queryset = m.Review.objects.all()
     serializer_class = s.ReviewSerializer
     pagination_class = LimitOffsetPagination
 
+    def get_queryset(self):
+        title_id = self.kwargs['title_id']
+        title = get_object_or_404(m.Title, pk=title_id)
+        return title.reviews.all()
+
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        title_id = self.kwargs['title_id']
+        serializer.save(
+            author=self.request.user,
+            title=get_object_or_404(m.Title, pk=title_id)
+        )
+
+    def perform_update(self, serializer):
+        serializer.save()
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [
-        IsAuthenticatedOrReadOnly,
-        p.IsAuthorOrReadOnly,
+        p.HasRightsOrReadOnly,
     ]
     serializer_class = s.CommentSerializer
 
@@ -103,6 +110,11 @@ class CommentViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             review=get_object_or_404(m.Review, pk=review_id)
         )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def perform_update(self, serializer):
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class SignupViewSet(viewsets.ModelViewSet):

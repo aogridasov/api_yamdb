@@ -60,6 +60,14 @@ class Review(models.Model):
         auto_now_add=True,
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='one-review-per-title'
+            ),
+        ]
+
     def __str__(self):
         return self.text
 
