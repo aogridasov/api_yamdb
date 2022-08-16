@@ -29,7 +29,6 @@ INSTALLED_APPS = [
     'api',
     'reviews',
     'users',
-    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +73,7 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = 'users.User'
 
 # Password validation
 

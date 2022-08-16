@@ -62,7 +62,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
     queryset = m.Title.objects.all()
     pagination_class = LimitOffsetPagination
     filter_backends = [DjangoFilterBackend]
-    filter_class = TitleFilter
+    filterset_class = TitleFilter
     search_fields = ('genre__slug')
     filterset_fields = ('genre__slug',)
     permission_classes = (p.IsAdminOrReadOnly,)
