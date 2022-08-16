@@ -1,13 +1,7 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
+
 from api_yamdb.settings import ROLE_CHOICES
-
-
-CHOICES = (
-    ('user', 'Пользователь'),
-    ('moderator', 'Модератор'),
-    ('admin', 'Администратор'),
-)
 
 
 class User(AbstractUser):
