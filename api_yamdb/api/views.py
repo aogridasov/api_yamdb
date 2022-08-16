@@ -1,3 +1,4 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.mixins import (
     CreateModelMixin,
     DestroyModelMixin,
@@ -20,6 +21,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import (
     IsAuthenticated,
 )
+from .filters import TitleFilter
 
 import reviews.models as m
 from . import serializers as s
@@ -58,10 +60,12 @@ class GenresViewSet(CreateDestroyListViewSet):
 
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = m.Title.objects.all()
-    permission_classes = (p.IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [DjangoFilterBackend]
+    filter_class = TitleFilter
+    search_fields = ('genre__slug')
     filterset_fields = ('genre__slug',)
+    permission_classes = (p.IsAdminOrReadOnly,)
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
