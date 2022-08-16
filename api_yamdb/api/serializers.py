@@ -22,8 +22,7 @@ class TitleListSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
 
     class Meta:
-        fields = ('id', 'name', 'year', 'genre',
-                  'category', 'description')
+        fields = '__all__'
         model = Title
 
 
@@ -42,15 +41,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Title
-
-
-class TitleSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(read_only=True, many=True)
-    category = CategorySerializer(read_only=True)
-
-    class Meta:
-        model = Title
-        fields = ('id', 'name', 'year', 'category', 'genre', 'description')
 
 
 class ReviewSerializer(serializers.ModelSerializer):

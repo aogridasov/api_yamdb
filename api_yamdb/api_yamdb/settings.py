@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'django_filters',
     'api_yamdb',
     'api',
     'reviews',
@@ -91,7 +92,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-AUTH_USER_MODEL = 'users.User'
 # Internationalization
 
 LANGUAGE_CODE = 'en-us'
@@ -129,6 +129,7 @@ ROLE_CHOICES = (
     ('moderator', 'Модератор'),
     ('user', 'Пользователь'),
 )
+
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
