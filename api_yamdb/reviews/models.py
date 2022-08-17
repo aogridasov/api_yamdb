@@ -1,4 +1,6 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
 from users.models import User
 
 
@@ -20,7 +22,7 @@ class Genre(models.Model):
 
 class Title(models.Model):
     name = models.CharField('Название произведения', max_length=256)
-    year = models.IntegerField('Год выхода')
+    year = models.PositiveSmallIntegerField('Год выхода')
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
@@ -43,8 +45,9 @@ class Title(models.Model):
 
 class Review(models.Model):
     text = models.TextField()
-    # score = models.IntegerChoices('Score', '1 2 3 4 5 6 7 8 9 10')
-    score = models.IntegerField()
+    score = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,

@@ -4,11 +4,11 @@ from rest_framework import routers
 from . import views as v
 
 router = routers.DefaultRouter()
-router.register(r'categories', v.CategoryViewSet, basename='categories')
-router.register(r'genres', v.GenresViewSet, basename='genres')
-router.register(r'titles', v.TitlesViewSet, basename='titles')
-router.register(r'auth/signup', v.SignupViewSet, basename='signup')
-router.register(r'users', v.UsersViewSet, basename='users')
+router.register('categories', v.CategoryViewSet, basename='categories')
+router.register('genres', v.GenresViewSet, basename='genres')
+router.register('titles', v.TitlesViewSet, basename='titles')
+router.register('auth/signup', v.SignupViewSet, basename='signup')
+router.register('users', v.UsersViewSet, basename='users')
 
 router.register(
     r'titles/(?P<title_id>\d+)/reviews',

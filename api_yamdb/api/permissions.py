@@ -12,8 +12,7 @@ class IsAdminOrReadOnly(BasePermission):
 class IsPost(BasePermission):
 
     def has_permission(self, request, view):
-        if request.method == 'POST':
-            return True
+        return request.method == 'POST'
 
 
 class IsAdmin(BasePermission):
