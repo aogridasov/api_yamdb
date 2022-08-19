@@ -12,8 +12,7 @@ class IsAdminOrReadOnly(BasePermission):
 class IsPost(BasePermission):
 
     def has_permission(self, request, view):
-        if request.method == 'POST':
-            return True
+        return request.method == 'POST'
 
 
 class IsAdmin(BasePermission):
@@ -21,6 +20,22 @@ class IsAdmin(BasePermission):
         return request.user.is_admin
 
 
-class IsAdminOrModerator(BasePermission):
+class HasRightsOrReadOnly(BasePermission):
+    message = 'Вы не авторизованы на данный запрос, sorry buddy'
+
     def has_permission(self, request, view):
-        return request.user.is_admin or request.user.is_moderator
+        return (
+            request.method in SAFE_METHODS
+            or request.user.is_authenticated
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return (request.method in SAFE_METHODS
+                or (request.user.is_authenticated
+                    and (
+                        obj.author == request.user
+                        or request.user.is_moderator
+                        or request.user.is_admin
+                    )
+                    )
+                )
