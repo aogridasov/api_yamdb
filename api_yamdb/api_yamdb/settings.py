@@ -123,12 +123,6 @@ REST_FRAMEWORK = {
     ),
 }
 
-ROLE_CHOICES = (
-    ('admin', 'Администратор'),
-    ('moderator', 'Модератор'),
-    ('user', 'Пользователь'),
-)
-
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
